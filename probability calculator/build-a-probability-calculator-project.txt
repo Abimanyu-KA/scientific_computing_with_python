@@ -1,0 +1,43 @@
+import copy
+import random
+
+class Hat:
+
+    def __init__(self,**balls):
+        self.contents = []
+        for color,count in balls.items():
+            self.contents.extend([color] * count)
+
+    def draw(self,num_balls):
+        rem = []
+        if num_balls > len(self.contents):
+            rem = self.contents.copy()
+            self.contents.clear()
+        else:
+            for i in range(0,num_balls):
+                r_int = random.randint(0,len(self.contents)-1)
+                rem.append(self.contents[r_int])
+                self.contents.pop(r_int)
+        return rem
+
+def experiment(hat, expected_balls, num_balls_drawn, num_experiments):
+    M = 0
+    for i in range(num_experiments):
+        hat_test = copy.deepcopy(hat)
+
+        drawn = hat_test.draw(num_balls_drawn)
+
+        drawn_count = {}
+        for ball in drawn:
+            drawn_count[ball] = drawn_count.get(ball, 0) + 1
+
+        success = True
+        for color, count in expected_balls.items():
+            if drawn_count.get(color, 0) < count:
+                success = False
+                break
+
+        if success:
+            M += 1
+
+    return (M / num_experiments)        

@@ -1,0 +1,109 @@
+class Category:
+
+    #creating instance variable ledger
+    def __init__(self,budget_category):
+        self.budget_category = budget_category
+        self.ledger = []
+    
+    #get_balance method
+    def get_balance(self):
+        self.balance = 0
+        for i in self.ledger:
+            self.balance += i['amount']
+        return self.balance
+        
+    
+    #check_funds method
+    def check_funds(self, amount):
+        blnc = self.get_balance()
+        if blnc < amount:
+            return False
+        else:
+            return True
+
+    #deposit method
+    def deposit(self,amount,description = ''):
+        self.temp_dict = {'amount':amount,'description':description}
+        self.ledger.append(self.temp_dict)
+
+    #withdraw method
+    def withdraw(self,amount,description = ''):
+        if self.check_funds(amount):
+            self.temp_dict = {'amount':-amount,'description':description}
+            self.ledger.append(self.temp_dict)
+            return True
+        
+        else:
+            return False
+
+    #transfer method
+    def transfer(self, amount,cat):
+        if self.check_funds(amount):
+            self.withdraw(amount,description = f'Transfer to {cat.budget_category}')
+            cat.temp_dict = {'amount':amount,'description':f'Transfer from {self.budget_category}'}
+            cat.ledger.append(cat.temp_dict)
+            return True
+        else:
+            return False
+
+    #getting total amount
+    def total(self):
+        t = 0
+        for item in self.ledger:            
+            t += item['amount']
+        return t
+    
+    #creating output string
+    def __str__(self):
+        ast = (30 - len(self.budget_category))//2 * '*'
+        title = f"{ast}{self.budget_category}{ast}\n"
+        final_output = title
+        self.t1 = self.total()
+        for j in self.ledger:
+            desc = j['description'][:23]
+            amnt = "{:.2f}".format(j['amount'])            
+            spaces = (30 - (len(desc) + len(amnt))) * ' '
+            final_output += f"{desc}{spaces}{amnt}\n"
+        final_output += f"Total: {self.t1}"
+            
+        return final_output
+
+
+def create_spend_chart(categories):
+    withdrawals = []
+    Total = 0
+    for cat in categories:
+        spent = 0
+        for item in cat.ledger:
+            if item['amount'] < 0:
+                spent += -item['amount']
+        withdrawals.append(spent)
+        Total += spent
+
+    percent = [(int((amount / Total) * 10) * 10) for amount in withdrawals]
+
+    final_op = 'Percentage spent by category\n'
+    for x in range(100, -1, -10):
+        op = f"{str(x).rjust(3)}| "
+        for p in percent:
+            op += 'o  ' if p >= x else '   '
+        final_op += op + '\n'
+
+    final_op += '    ' + '-' * (len(categories)*3 + 1) + '\n'
+
+    cat_names = [cat.budget_category for cat in categories]
+    max_len = max(len(name) for name in cat_names)
+
+    for i in range(max_len):
+        line = '     '
+        for name in cat_names:
+            if i < len(name):
+                line += name[i] + '  '
+            else:
+                line += '   '
+        if i < max_len - 1:
+            final_op += line + '\n'
+        else:
+            final_op += line
+
+    return final_op

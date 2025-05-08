@@ -1,0 +1,57 @@
+def add_time(start, duration, day = 'NA'):
+    result_time = []
+    days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+    time12 = start.split(' ')
+    time24 = [int(x) for x in time12[0].split(':')]
+
+    if time12[1] == 'PM':
+         time24[0] += 12
+
+    skip = [int(y) for y in duration.split(':')]
+
+    #performing arithmetic operations to find new time
+    sum_mins = time24[1] + skip[1]
+    rem_mins = sum_mins%60
+    carry_hours = sum_mins//60
+    result_time.insert(0,rem_mins)
+    skip[0] += carry_hours
+
+    result_time.insert(0,time24[0] + skip[0])
+
+    day_cycles = result_time[0]//24
+    result_time[0] %= 24
+
+    #finding the meridiem and updating the result hour
+    meridiem = 'AM'
+    if result_time[0] >= 12:
+        meridiem = 'PM'
+        if result_time[0] > 12:
+            result_time[0] -= 12
+    if result_time[0] == 0:
+        result_time[0] = 12
+    
+    #creating string for output when days passed
+    if day_cycles == 0:
+        sdc = ''
+    elif day_cycles == 1:
+        sdc = '(next day)'
+    else:
+        sdc = f'({day_cycles} days later)'
+
+    #output thats always sent out
+    new_time = f"{result_time[0]}:{result_time[1]:02} {meridiem}"
+
+    #if day is specified
+    day = day.capitalize()    
+    if day in days:
+        day_id = days.index(day)
+
+        relative_day = (day_cycles + day_id)%7
+
+        new_time += f", {days[relative_day]}"
+
+    #Adding the 'days later' if days have passed
+    if day_cycles > 0:
+        new_time += f" {sdc}"
+        
+    return new_time
